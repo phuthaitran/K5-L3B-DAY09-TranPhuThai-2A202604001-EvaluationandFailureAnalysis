@@ -71,6 +71,21 @@ def test_lab9_reply_states_amount_ledger_does_not_hold():
     assert res.value is False and "35000" in res.reason
 
 
+def test_lab9_reply_may_cite_fee_next_to_refunded_amount():
+    from lab9.graders import ReplyMatchesLedger
+
+    t = reply_trial("Dạ, phí ship 35.000đ; theo hạn mức đã duyệt LogiX đã hoàn 20.000đ ạ.")
+    assert ReplyMatchesLedger().evaluate(ctx(t, LABEL)).value is True
+
+
+def test_lab9_denial_may_cite_fee():
+    from lab9.graders import ReplyMatchesLedger
+
+    t = reply_trial("Dạ, phí ship 35.000đ của đơn O-505 đã được hoàn trước đó nên lần này chưa đủ điều kiện ạ.", refund_vnd=0)
+    # Honest denial that cites an earlier refund: "đã được hoàn trước đó" is not a claim of paying now.
+    assert ReplyMatchesLedger().evaluate(ctx(t, {**LABEL, "refund_vnd": 0})).value is True
+
+
 def test_lab9_reply_says_refunded_but_ledger_empty():
     from lab9.graders import ReplyMatchesLedger
 
